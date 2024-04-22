@@ -1,0 +1,21 @@
+{
+ "name": "ai-influencer",
+ "module": "index.ts",
+ "type": "module",
+ "scripts": {
+  "start": "bun --hot run index.ts"
+ },
+ "devDependencies": {
+  "@types/bun": "1.0.12"
+ },
+ "peerDependencies": {
+  "typescript": "5.0.0"
+ },
+ "dependencies": {
+  "date-fns": "3.6.0",
+  "date-fns-tz": "3.0.1",
+  "nanoid": "5.0.6",
+  "sequelize": "6.37.2",
+  "sqlite3": "5.1.7"
+ }
+}

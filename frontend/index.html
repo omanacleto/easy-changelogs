@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Settings</title>
+  <script src="/tailwind"></script>
+ </head>
+ <body class="font-sans bg-gray-200 flex justify-center items-start h-screen m-0 p-0 ">
+  <form id="configForm" class="bg-white p-6 rounded-lg shadow-lg max-w-2xl w-full mt-7">
+   <div class="mb-4">
+    <label for="secret" class="block mb-2 text-gray-700">Secret</label>
+    <div class="flex items-stretch mb-4 gap-2">
+     <input
+      class="flex-1 border-2 border-gray-300 p-2 rounded-l-md"
+      type="text"
+      id="secret"
+      name="secret"
+      required
+     />
+     <button
+      class="bg-gray-600 text-white p-2 rounded-r-md hover:bg-gray-700"
+      type="button"
+      onclick="window.setRandomSecret()"
+     >
+      Generate
+     </button>
+    </div>
+   </div>
+
+   <div class="mb-4">
+    <label for="pageTitle" class="block mb-2 text-gray-700">Page Title</label>
+    <input
+     class="border-2 border-gray-300 p-2 w-full rounded-md"
+     type="text"
+     id="pageTitle"
+     name="pageTitle"
+     required
+     placeholder="Changelog"
+     value="Changelog"
+    />
+   </div>
+
+   <div class="mb-4">
+    <label for="pageSubtitle" class="block mb-2 text-gray-700">Page Subtitle</label>
+    <input
+     class="border-2 border-gray-300 p-2 w-full rounded-md"
+     type="text"
+     id="pageSubtitle"
+     name="pageSubtitle"
+     placeholder="Find all the new features, fixes and deprecations here."
+    />
+   </div>
+
+   <!-- Repeat the above structure for each label-input pair -->
+   <div class="mb-4">
+    <label for="featuresLabel" class="block mb-2 text-gray-700">"Features" Label</label>
+    <input
+     class="border-2 border-gray-300 p-2 w-full rounded-md"
+     type="text"
+     id="featuresLabel"
+     name="featuresLabel"
+     required
+     placeholder="Features"
+     value="Features"
+    />
+   </div>
+
+   <div class="mb-4">
+    <label for="fixesLabel" class="block mb-2 text-gray-700">"Fixes" Label</label>
+    <input
+     class="border-2 border-gray-300 p-2 w-full rounded-md"
+     type="text"
+     id="fixesLabel"
+     name="fixesLabel"
+     required
+     placeholder="Fixes"
+     value="Fixes"
+    />
+   </div>
+
+   <div class="mb-4">
+    <label for="deprecationsLabel" class="block mb-2 text-gray-700">"Deprecations" Label</label>
+    <input
+     class="border-2 border-gray-300 p-2 w-full rounded-md"
+     type="text"
+     id="deprecationsLabel"
+     name="deprecationsLabel"
+     required
+     placeholder="Deprecations"
+     value="Deprecations"
+    />
+   </div>
+
+   <div class="mb-4">
+    <label for="dateFormat" class="block mb-2 text-gray-700">Date Format</label>
+    <input
+     class="border-2 border-gray-300 p-2 w-full rounded-md"
+     type="text"
+     id="dateFormat"
+     name="dateFormat"
+     placeholder="dd/MM/yyyy"
+     value="dd/MM/yyyy"
+     required
+    />
+   </div>
+
+   <div class="mb-4">
+    <label for="maxEntries" class="block mb-2 text-gray-700">Max Entries</label>
+    <input
+     class="border-2 border-gray-300 p-2 w-full rounded-md"
+     type="number"
+     value="10"
+     id="maxEntries"
+     name="maxEntries"
+    />
+   </div>
+
+   <div class="mb-4">
+    <label for="metaTags" class="block mb-2 text-gray-700">Meta Tags</label>
+    <textarea
+     class="border-2 border-gray-300 p-2 w-full rounded-md"
+     id="metaTags"
+     name="metaTags"
+     rows="5"
+     placeholder='<link rel="icon" type="image/x-icon" href="/images/favicon.ico">'
+    ></textarea>
+   </div>
+
+   <div class="flex items-center mb-4 gap-2">
+    <input type="checkbox" id="versioning" name="versioning" class="form-checkbox" />
+    <label for="versioning" class="select-none text-gray-700">Use versioning</label>
+   </div>
+
+   <div class="mb-4">
+    <label for="branches" class="block mb-2 text-gray-700">Limit to repository branches</label>
+    <textarea
+     class="border-2 border-gray-300 p-2 w-full rounded-md"
+     id="branches"
+     name="branches"
+     rows="2"
+     placeholder="Leave it empty for any branch. Separate multiple branches with a comma."
+    ></textarea>
+   </div>
+
+   <button
+    type="submit"
+    class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-700 mt-4 w-full"
+   >
+    Save
+   </button>
+
+   <p id="errorMessage" class="text-red-500 mt-4"></p>
+   <p id="successMessage" class="text-green-500 mt-4"></p>
+  </form>
+
+  <script type="module">
+   import { nanoid } from "/nanoid";
+
+   window.setRandomSecret = () => {
+    document.getElementById("secret").value = nanoid(50);
+   };
+
+   const searchParams = new URLSearchParams(window.location.search);
+   const secret = searchParams.get("secret");
+
+   let url = `/settings?`;
+   if (secret) url += `secret=${secret}`;
+
+   document.getElementById("configForm").addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    // disable the save button
+    document.querySelector("button[type=submit]").disabled = true;
+
+    document.getElementById("errorMessage").textContent = "";
+
+    const formData = new FormData(this);
+
+    formData.set("versioning", formData.get("versioning") ? "on" : "off");
+
+    fetch(url, {
+     method: "POST",
+     body: formData,
+    })
+     .then(async (response) => {
+      if (!response.ok) {
+       const msg = await response.text();
+       throw new Error(msg);
+      }
+      return response.text();
+     })
+     .then((data) => {
+      document.getElementById("successMessage").textContent = "Success!";
+      setTimeout(() => {
+       // reload current window with secret
+       window.location.href = `/?secret=${formData.get("secret")}`;
+      }, 1000);
+     })
+     .catch((error) => {
+      document.getElementById("errorMessage").textContent = error.message;
+     });
+   });
+
+   fetch(url)
+    .then(
+     async (response) => {
+      if (!response.ok) {
+       const msg = await response.text();
+       throw new Error(msg);
+      }
+      return response.json();
+     },
+     (error) => {
+      document.getElementById("errorMessage").textContent = error.message;
+     }
+    )
+    .then((data) => {
+     const secret = data.secret;
+     const versioning = data.versioning;
+     const featuresLabel = data.featuresLabel;
+     const fixesLabel = data.fixesLabel;
+     const deprecationsLabel = data.deprecationsLabel;
+     const dateFormat = data.dateFormat;
+     const metaTags = data.metaTags;
+     const pageTitle = data.pageTitle;
+     const pageSubtitle = data.pageSubtitle;
+     const maxEntries = data.maxEntries;
+     const branches = data.branches;
+
+     document.getElementById("secret").value = secret;
+     document.getElementById("featuresLabel").value = featuresLabel;
+     document.getElementById("fixesLabel").value = fixesLabel;
+     document.getElementById("deprecationsLabel").value = deprecationsLabel;
+     document.getElementById("dateFormat").value = dateFormat;
+     document.getElementById("metaTags").value = metaTags || "";
+     document.getElementById("pageTitle").value = pageTitle;
+     document.getElementById("pageSubtitle").value = pageSubtitle;
+     document.getElementById("maxEntries").value = maxEntries;
+     document.getElementById("branches").value = branches || "";
+
+     const versioningChecked = !!(versioning === "on");
+     const element = document.getElementById("versioning");
+     if (element) element.checked = versioningChecked;
+    });
+  </script>
+ </body>
+</html>

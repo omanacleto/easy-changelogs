@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="/tailwind"></script>
+  <title>New Log</title>
+ </head>
+ <body class="font-sans bg-gray-200 flex flex-col justify-center items-center h-screen m-0 p-0">
+  <form id="configForm" class="bg-white p-5 rounded-lg shadow-md max-w-lg w-full mb-5">
+   <div class="mb-4">
+    <label class="block mb-2">Type</label>
+    <div class="flex items-center mb-2">
+     <input type="radio" id="feature" name="type" value="feature" class="form-radio" required />
+     <label for="feature" class="ml-2">Feature</label>
+    </div>
+    <div class="flex items-center mb-2">
+     <input type="radio" id="fix" name="type" value="fix" class="form-radio" required />
+     <label for="fix" class="ml-2">Fix</label>
+    </div>
+    <div class="flex items-center mb-2">
+     <input
+      type="radio"
+      id="deprecated"
+      name="type"
+      value="deprecated"
+      class="form-radio"
+      required
+     />
+     <label for="deprecated" class="ml-2">Deprecation</label>
+    </div>
+   </div>
+
+   <div class="mb-4">
+    <label for="message" class="block mb-2">Message</label>
+    <input
+     type="text"
+     id="message"
+     name="message"
+     class="border-2 border-gray-300 p-2 w-full rounded-md"
+     required
+    />
+   </div>
+
+   <div class="mb-4" id="datefield">
+    <label for="date" class="block mb-2">Date</label>
+    <input
+     type="date"
+     id="date"
+     name="date"
+     class="border-2 border-gray-300 p-2 w-full rounded-md"
+     required
+    />
+   </div>
+
+   <div class="mb-4" id="versioningfield">
+    <label for="version" class="block mb-2">Version</label>
+    <input
+     type="text"
+     id="version"
+     name="version"
+     class="border-2 border-gray-300 p-2 w-full rounded-md"
+     required
+    />
+   </div>
+
+   <button
+    type="submit"
+    class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-700 w-full"
+   >
+    Add Log
+   </button>
+   <p id="errorMessage" class="text-red-500 mt-4"></p>
+   <p id="successMessage" class="text-green-500 mt-4"></p>
+  </form>
+
+  <div id="Unreleased-versions" class="versions bg-white p-5 rounded-lg shadow-md max-w-lg w-full">
+   <h4 class="text-lg font-semibold mb-4">Unreleased Versions</h4>
+   <p id="errorMessageVersion" class="text-red-500 mt-4"></p>
+   <!-- Placeholder for unreleased versions -->
+   [UNRELEASEDVERSIONS]
+  </div>
+
+  <script type="module">
+   const useVersioning = "[VERSIONING]";
+
+   if (useVersioning === "on") {
+    // delete the date field
+    document.getElementById("datefield").remove();
+   } else {
+    // delete the version field
+    document.getElementById("versioningfield").remove();
+    document.getElementById("Unreleased-versions").remove();
+    //get the date input and set its value for today
+    const dateInput = document.getElementById("date");
+    const today = new Date().toISOString().split("T")[0];
+    dateInput.value = today;
+   }
+
+   const searchParams = new URLSearchParams(window.location.search);
+   const secret = searchParams.get("secret");
+
+   window.releaseVersion = async function (version) {
+    const url = `/version/release?secret=${secret}&version=${version}`;
+
+    const response = await fetch(url, {
+     method: "POST",
+    });
+
+    if (response.ok) window.location.reload();
+    else {
+     const msg = await response.text();
+     document.getElementById("errorMessageVersion").textContent = msg;
+    }
+   };
+
+   window.deleteVersion = async function (version) {
+    const url = `/version?secret=${secret}&version=${version}`;
+
+    const response = await fetch(url, {
+     method: "DELETE",
+    });
+
+    if (response.ok) window.location.reload();
+    else {
+     const msg = await response.text();
+     document.getElementById("errorMessageVersion").textContent = msg;
+    }
+   };
+
+   document.getElementById("configForm").addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    let url = `/changelog?secret=${secret}`;
+
+    document.getElementById("errorMessage").textContent = "";
+
+    const formData = new FormData(this);
+
+    fetch(url, {
+     method: "POST",
+     body: formData,
+    })
+     .then(async (response) => {
+      if (!response.ok) {
+       const msg = await response.text();
+       throw new Error(msg);
+      }
+      return response.text();
+     })
+     .then((data) => {
+      document.getElementById("successMessage").textContent = "Success!";
+      setTimeout(() => {
+       // reload current window with secret
+       window.location.href = `/changelog?secret=${secret}`;
+      }, 1000);
+     })
+     .catch((error) => {
+      document.getElementById("errorMessage").textContent = error.message;
+     });
+   });
+  </script>
+ </body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+
+<html lang="en" class="font-sans">
+ <head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>[PAGETITLE]</title>
+  <meta name="description" content="[PAGESUBTITLE]" />
+  [META]
+  <script src="/tailwind"></script>
+  <script src="/jquery"></script>
+  <script>
+   window.removeLog = async function (logId) {
+    const searchParams = new URLSearchParams(window.location.search);
+    const secret = searchParams.get("secret");
+    const response = await fetch(`/changelog?id=${logId}&secret=${secret}`, {
+     method: "DELETE",
+    });
+    if (response.ok) {
+     document.getElementById(`log-${logId}`).remove();
+    }
+   };
+
+   document.addEventListener("DOMContentLoaded", function () {
+    $(".loglist").each(function () {
+     if ($(this).text().trim() === "") {
+      $(this).remove();
+     }
+    });
+   });
+  </script>
+ </head>
+ <body>
+  <section class="w-full max-w-5xl px-2 py-6 md:py-12 mx-auto text-center">
+   <h1 class="text-3xl font-bold">[PAGETITLE]</h1>
+   <p class="mt-3 text-xl text-gray-600 md:text-2xl">[PAGESUBTITLE]</p>
+  </section>
+  <section class="px-2 py-12 md:mt-12 bg-gradient-to-b from-gray-50 to-white">
+   <ul class="relative w-full max-w-5xl mx-auto">
+    <span
+     class="absolute bottom-0 left-0 hidden w-1 rounded bg-gray-200/60 top-3 translate-x-2 md:block"
+     aria-hidden="true"
+    ></span>
+    [LOGS]
+   </ul>
+  </section>
+ </body>
+</html>
