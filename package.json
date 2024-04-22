@@ -3,7 +3,7 @@
  "module": "index.ts",
  "type": "module",
  "scripts": {
-  "start": "bun --hot run index.ts"
+  "start": "bun run index.ts"
  },
  "devDependencies": {
   "@types/bun": "1.0.12"
