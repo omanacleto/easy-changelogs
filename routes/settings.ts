@@ -19,7 +19,7 @@ app.get("/", async (req, res) => {
  const valid = await validateSecret(secret);
  if (!valid) return res.status(401).send("invalid_secret");
 
- const html = Bun.file("./frontend/index.html").text();
+ const html = await Bun.file("./frontend/index.html").text();
  res.setHeader("content-type", "text/html").status(200).send(html);
 });
 
