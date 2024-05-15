@@ -14,6 +14,7 @@ import {
  deleteVersion,
  deleteChangeLog,
  isVersionEmpty,
+ logExists,
 } from "../database";
 import getQuery from "../services/getQuery";
 import { formatInTimeZone } from "date-fns-tz";
@@ -403,9 +404,10 @@ app.post("/changelog/hook", async (req, res) => {
      version: isVersioned && configuration.versioning === "on" ? version : null,
     } as Partial<ChangeLogAttributes>;
 
-    console.log(changeLog);
-
-    await addChangeLog(changeLog as ChangeLogAttributes);
+    // we only add the log if a exact match doesn't exist
+    if (!(await logExists(changeLog.message as string, changeLog.type as string))) {
+     await addChangeLog(changeLog as ChangeLogAttributes);
+    }
    }
 
    if (!!release) await releaseVersion(version);

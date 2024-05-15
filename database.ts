@@ -68,8 +68,13 @@ export async function addChangeLog(attributes: ChangeLogAttributes) {
  await ChangeLog.create(attributes);
 }
 
+export async function logExists(message: string, type: string): Promise<boolean> {
+ const log = await ChangeLog.findOne({ where: { message, type } });
+ return !!log;
+}
+
 export async function updateChangeLog(id: number, attributes: Partial<ChangeLogAttributes>) {
- await ChangeLog.update(attributes, { where: { id } });
+ const log = await ChangeLog.update(attributes, { where: { id } });
 }
 
 export async function deleteChangeLog(id: number): Promise<string | undefined> {
