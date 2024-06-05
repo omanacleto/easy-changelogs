@@ -127,7 +127,7 @@ app.get("/changelogs", async (req, res) => {
 
    logsByVersion[id].forEach(({ type, message, id }) => {
     const nLog = log
-     .replaceAll("[MESSAGE]", parseMd(message))
+     .replaceAll("[MESSAGE]", `◦ ${parseMd(message)}`)
      .replaceAll("[REMOVEBUTTON]", isLoggedIn ? removeBtn : "")
      .replaceAll("[LOGID]", id.toString());
 
@@ -186,7 +186,7 @@ app.get("/changelogs", async (req, res) => {
 
    logsByDate[date].forEach(({ type, message, id }) => {
     const nLog = log
-     .replaceAll("[MESSAGE]", parseMd(message))
+     .replaceAll("[MESSAGE]", `◦ ${parseMd(message)}`)
      .replaceAll("[REMOVEBUTTON]", isLoggedIn ? removeBtn : "")
      .replaceAll("[LOGID]", id.toString());
 
