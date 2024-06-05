@@ -165,9 +165,9 @@ app.get("/changelogs", async (req, res) => {
   });
  } else {
   const logsByDate = logs.reduce((acc, log) => {
-   const date = formatInTimeZone(log.date, "UTC", "dd/MM/yyyy");
-   if (!acc[date]) acc[date] = [];
-   acc[date].push(log);
+   const iso = log.date.toISOString();
+   if (!acc[iso]) acc[iso] = [];
+   acc[iso].push(log);
    return acc;
   }, {} as { [key: string]: ChangeLogAttributes[] });
 
@@ -176,7 +176,9 @@ app.get("/changelogs", async (req, res) => {
    .splice(0, maxEntries);
 
   dates.forEach((date) => {
-   let group = logGroup.replace("[VERSION]", date).replace("[DATE]", "");
+   let group = logGroup
+    .replace("[VERSION]", formatInTimeZone(new Date(date), "UTC", "dd/MM/yyyy"))
+    .replace("[DATE]", "");
 
    let hasFeatures = false;
    let hasDeprecations = false;
