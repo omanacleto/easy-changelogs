@@ -20,6 +20,7 @@ import getQuery from "../services/getQuery";
 import { formatInTimeZone } from "date-fns-tz";
 import validateSecret from "../services/validateSecret";
 import parseMd from "../services/parseMd";
+import { set, setHours } from "date-fns";
 
 // simple mapping to normalize the type of the changelog
 const typeMapper: {
@@ -165,7 +166,8 @@ app.get("/changelogs", async (req, res) => {
   });
  } else {
   const logsByDate = logs.reduce((acc, log) => {
-   const iso = log.date.toISOString();
+   const iso = new Date(log.date).toISOString().split("T")[0] + "T00:00:00.000Z"; // removes any timezone
+
    if (!acc[iso]) acc[iso] = [];
    acc[iso].push(log);
    return acc;
@@ -174,6 +176,8 @@ app.get("/changelogs", async (req, res) => {
   const dates = Object.keys(logsByDate)
    .sort((a, b) => (a > b ? -1 : 1))
    .splice(0, maxEntries);
+
+  console.log(`💩 ~ file: changelogs.ts:182 ~ app.get ~ dates:`, dates);
 
   dates.forEach((date) => {
    let group = logGroup
