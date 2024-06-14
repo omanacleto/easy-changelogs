@@ -41,6 +41,12 @@ const ChangeLog = sequelize.define("ChangeLog", {
  version: { type: DataTypes.STRING },
 });
 
+// Auxiliary table to store the commit messages so that we wont repeat them
+const ChangeLogCommitIdentifiers = sequelize.define("ChangeLogCommitIdentifiers", {
+ message: { type: DataTypes.STRING, primaryKey: true },
+ type: { type: DataTypes.STRING },
+});
+
 export async function getConfiguration(): Promise<{
  [key: string]: string;
 }> {
@@ -66,11 +72,6 @@ export async function getChangeLog(): Promise<ChangeLogAttributes[]> {
 
 export async function addChangeLog(attributes: ChangeLogAttributes) {
  await ChangeLog.create(attributes);
-}
-
-export async function logExists(message: string, type: string): Promise<boolean> {
- const log = await ChangeLog.findOne({ where: { message, type } });
- return !!log;
 }
 
 export async function updateChangeLog(id: number, attributes: Partial<ChangeLogAttributes>) {
@@ -113,11 +114,20 @@ export async function deleteVersion(id: string) {
  await ChangeLog.destroy({ where: { version: id } });
 }
 
+export async function addCommitIdentifier(message: string, type: string) {
+ await ChangeLogCommitIdentifiers.create({ message, type });
+}
+
+export async function commitIdentifierExists(message: string, type: string) {
+ return (await ChangeLogCommitIdentifiers.findOne({ where: { message, type } })) !== null;
+}
+
 export async function initializeDatabase() {
  console.log("Initializing Database");
  await Configuration.sync();
  await ChangeLog.sync();
  await Version.sync();
+ await ChangeLogCommitIdentifiers.sync();
 
  /*
     If there is no configuration, populate with defaults

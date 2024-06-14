@@ -14,7 +14,8 @@ import {
  deleteVersion,
  deleteChangeLog,
  isVersionEmpty,
- logExists,
+ commitIdentifierExists,
+ addCommitIdentifier,
 } from "../database";
 import getQuery from "../services/getQuery";
 import { formatInTimeZone } from "date-fns-tz";
@@ -411,8 +412,9 @@ app.post("/changelog/hook", async (req, res) => {
     } as Partial<ChangeLogAttributes>;
 
     // we only add the log if a exact match doesn't exist
-    if (!(await logExists(changeLog.message as string, changeLog.type as string))) {
+    if (!(await commitIdentifierExists(changeLog.message as string, changeLog.type as string))) {
      await addChangeLog(changeLog as ChangeLogAttributes);
+     await addCommitIdentifier(changeLog.message as string, changeLog.type as string);
     }
    }
 
